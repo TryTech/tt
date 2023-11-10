@@ -21,10 +21,10 @@ int isReservedWords(char* word)
     return 0;
 }
 
-void lex(char* buffer)
+struct TokenList* lex(char* buffer)
 {
-    struct TokenList *head = NULL;
-    struct TokenList *tail = NULL;
+    struct TokenList* head = NULL;
+    struct TokenList* tail = NULL;
 
     int64_t current = 0;
     int64_t start = 0;  
@@ -34,7 +34,71 @@ void lex(char* buffer)
 
     while(current < length) {
         char c = buffer[current];
+        char* type = NULL;
         switch (c) {
+            case '+':
+                type = "Plus";
+                break;
+            case '-':
+                type = "Minus";
+                break;
+            case '*':
+                type = "Asterisk";
+                break;
+            case '/':
+                type = "Slash";
+                break;
+            case '%':
+                type = "Percent";
+                break;
+            case '=':
+                type = "Equal";
+                break;
+            case '!':
+                type = "Exclamation";
+                break;
+            case '<':
+                type = "Less Than";
+                break;
+            case '>':
+                type = "Greater Than";
+                break;
+            case '&':
+                type = "Ampersand";
+                break;
+            case '|':
+                type = "Pipe";
+                break;
+            case '^':
+                type = "Caret";
+                break;
+            case '~':
+                type = "Tilde";
+                break;
+            case '?':
+                type = "Question Mark";
+                break;
+            case ':':
+                type = "Colon";
+                break;
+            case ',':
+                type = "Comma";
+                break;
+            case '.':
+                type = "Period";
+                break;
+            case '"':
+                type = "Quote";
+                break;
+            case '\'':
+                type = "Apostrophe";
+                break;
+            case '\\':
+                type = "Backslash";
+                break;
+            case '\0':
+                type = "EOF";
+                break;
             case '\n':
                 line++;
                 column = 1;
@@ -44,59 +108,27 @@ void lex(char* buffer)
             case '\t':
                 break;
             case '(':
-                printf("Left Parenthesis\n");
+                type = "Left Parenthesis";
                 break;
             case ')':
-                printf("Right Parenthesis\n");
+                type = "Right Parenthesis";
                 break;
             case '{':
-                printf("Left Brace\n");
+                type = "Left Brace";
                 break;
             case '}':
-                printf("Right Brace\n");
+                type = "Right Brace";
                 break;
             case '[':
-                printf("Left Bracket\n");
+                type = "Left Bracket";
                 break;
             case ']':
-                printf("Right Bracket\n");
+                type = "Right Bracket";
                 break;
             case ';':
-                printf("Semicolon\n");
+                type = "Semicolon";
                 break;
-            case ',':
-                printf("Comma\n");
-                break;
-            case '.':
-                printf("Dot\n");
-                break;
-            case '-':
-                printf("Minus\n");
-                break;
-            case '+':
-                printf("Plus\n");
-                break;
-            case '/':
-                printf("Slash\n");
-                break;
-            case '*':
-                printf("Star\n");
-                break;
-            case '!':
-                printf("Bang\n");
-                break;
-            case '=':
-                printf("Equal\n");
-                break;
-            case '<':
-                printf("Less\n");
-                break;
-            case '>':
-                printf("Greater\n");
-                break;
-            case '"':
-                printf("String\n");
-                break;
+            // Add more cases here for other characters
             default:
                 if(isalpha(c)) {
                     start = current;
@@ -104,29 +136,36 @@ void lex(char* buffer)
                         current++;
                     }
                     char* identifier = strndup(buffer + start, current - start);
-                    struct Token *token = malloc(sizeof(struct Token));
-                    token->value = identifier;
-                    token->type = isReservedWords(identifier) ? "reserved" : "identifier";
-                    token->line = line;
-                    token->column = column;
-
-                    struct TokenList *node = malloc(sizeof(struct TokenList));
-                    node->token = token;
-                    node->next = NULL;
-                    if (head == NULL) {
-                        head = node;
-                        tail = node;
-                    } else {
-                        tail->next = node;
-                        tail = node;
-                    }
-                    current--; // decrement current to avoid skipping characters
+                    type = isReservedWords(identifier) ? "Reserved Word" : "Identifier";
+                    current--;
                 } else {
                     printf("Unknown character: %c\n", c);
                 }
                 break;
         }
+        if (type != NULL) {
+            struct Token* token = malloc(sizeof(struct Token));
+            token->value = strndup(&c, 1);
+            token->type = type;
+            token->line = line;
+            token->column = column;
+
+            struct TokenList* node = malloc(sizeof(struct TokenList));
+            node->token = token;
+            node->next = NULL;
+
+            if (head == NULL) {
+                head = node;
+                tail = node;
+            } else {
+                tail->next = node;
+                tail = node;
+            }
+        }
         current++;
         column++;
     }
+
+    free(buffer);
+    return head;
 }
