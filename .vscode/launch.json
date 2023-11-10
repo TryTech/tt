@@ -5,7 +5,9 @@
             "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
-            "args": [],
+            "args": [
+                "examples/func.tt"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
